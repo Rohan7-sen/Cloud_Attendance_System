@@ -1,0 +1,61 @@
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Attendance");
+    if (!sheet) {
+      sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("Attendance");
+      sheet.appendRow(["Timestamp", "Date", "ID", "Name", "Branch", "Time In", "Time Out"]);
+    }
+
+    var data = JSON.parse(e.postData.contents);
+    var dateStr = data.date.trim(); // e.g., "31-08-2025"
+    var id = data.id.trim();
+    var name = data.name;
+    var branch = data.branch;
+    var timeIn = data.time_in || "";
+    var timeOut = data.time_out || "";
+
+    Logger.log("Received data: " + JSON.stringify(data));
+
+    var lastRow = sheet.getLastRow();
+    var found = false;
+
+    for (var i = 2; i <= lastRow; i++) {
+      var sheetDateRaw = sheet.getRange(i, 2).getValue();   // Column B
+      var sheetID = sheet.getRange(i, 3).getValue().toString().trim(); // Column C
+
+      // Normalize the sheet date for comparison
+      var formattedSheetDate = Utilities.formatDate(new Date(sheetDateRaw), "Asia/Kolkata", "dd-MM-yyyy");
+
+      Logger.log("Row " + i + ": ID=" + sheetID + ", Date=" + formattedSheetDate);
+
+      if (formattedSheetDate === dateStr && sheetID === id) {
+        Logger.log("Match found at row " + i);
+        if (timeOut !== "") {
+          sheet.getRange(i, 7).setValue(timeOut); // Column G
+        }
+        found = true;
+        break;
+      }
+    }
+
+    if (!found && timeIn !== "") {
+      Logger.log("Adding new row for time in");
+      sheet.appendRow([
+        Utilities.formatDate(new Date(), "Asia/Kolkata", "dd-MM-yyyy HH:mm:ss"), // Timestamp
+        dateStr,
+        id,
+        name,
+        branch,
+        timeIn,
+        "" // Time Out
+      ]);
+    }
+
+    SpreadsheetApp.flush();
+    return ContentService.createTextOutput("Success");
+
+  } catch (error) {
+    Logger.log("Error: " + error.message);
+    return ContentService.createTextOutput("Error: " + error.message);
+  }
+}
