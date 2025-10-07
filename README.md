@@ -1,2 +1,2 @@
 # Cloud_Attendance_System
-Please Understand th code and apply..
+Please Understand the code and apply..
