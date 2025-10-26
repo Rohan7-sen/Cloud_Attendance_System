@@ -27,8 +27,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 // Indicator Pins
 #define BUZZER_PIN D2
-#define GREEN_LED_PIN D6
-#define RED_LED_PIN D7
+#define GREEN_LED_PIN D8
+#define RED_LED_PIN D1
 
 // Scan debounce
 unsigned long lastScanTime = 0;
@@ -37,6 +37,7 @@ String lastScannedUID = "";
 // State handling
 bool scanInProgress = false;
 unsigned long scanStartTime = 0;
+
 int scannedStudentIndex = -1;
 bool awaitingPost = false;
 bool posted = false;
